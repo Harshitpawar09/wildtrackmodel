@@ -40,32 +40,17 @@ interface AnalysisViewProps {
 }
 
 export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
-  const [stage, setStage] = useState<"scanning" | "processing" | "complete" | "error">("scanning");
+  const [stage, setStage] = useState<"scanning" | "processing" | "complete">("scanning");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const CONFIDENCE_THRESHOLD = 70; // percent
 
   // Convert file to URL for display
   const imageUrl = URL.createObjectURL(imageFile);
 
   useEffect(() => {
-    // Basic validation for image type and size (simulate low-quality/invalid images)
-    const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
-    if (!validTypes.includes(imageFile.type)) {
-      setError("Invalid Image Format. Please upload a JPG, PNG, or WebP image.");
-      setStage("error");
-      return;
-    }
-    if (imageFile.size < 10 * 1024) { // less than 10kb
-      setError("Image Not Clear. Please upload a higher quality image.");
-      setStage("error");
-      return;
-    }
-
     // Simulation of analysis process
     let timer: NodeJS.Timeout;
-
+    
     if (stage === "scanning") {
       timer = setInterval(() => {
         setProgress((prev) => {
@@ -78,40 +63,16 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
       }, 40);
     } else if (stage === "processing") {
       setTimeout(() => {
-        // If the filename does not contain 'tiger' or 'elephant', treat as invalid image
-        const lowerName = imageFile.name.toLowerCase();
-        let isInvalid = false;
-        if (!lowerName.includes("tiger") && !lowerName.includes("elephant")) {
-          isInvalid = true;
-        }
+        // For simulation, we'll randomly pick one of the supported classes
+        // In a real backend integration, this would be the response from the Python script
         const keys = Object.keys(SPECIES_DATA);
+        // Use a more varied random selection based on file properties
         const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
         const sizeHash = imageFile.size;
         const combinedHash = (hash ^ sizeHash) * 9301 + 49297;
         const index = Math.abs(combinedHash % keys.length);
+        const species = SPECIES_DATA[keys[index]];
         const confidence = generateConfidenceScore(imageFile);
-        let species;
-        if (isInvalid) {
-          species = {
-            id: "invalid",
-            name: "Invalid Image",
-            scientific: "N/A",
-            status: "N/A",
-            description: "The uploaded image does not appear to be a valid animal footprint. Please upload another image.",
-            habitat: "N/A",
-          };
-        } else if (confidence < CONFIDENCE_THRESHOLD) {
-          species = {
-            id: "Invalid",
-            name: "Invalid",
-            scientific: "Unknown",
-            status: "Unknown",
-            description: "The uploaded footprint does not match tiger or elephant. It may belong to another animal.",
-            habitat: "Unknown",
-          };
-        } else {
-          species = SPECIES_DATA[keys[index]];
-        }
         setResult({ ...species, confidence });
         setStage("complete");
       }, 1500);
@@ -119,18 +80,6 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
 
     return () => clearInterval(timer);
   }, [stage, imageFile]);
-
-  if (stage === "error") {
-    return (
-      <div className="w-full max-w-xl mx-auto text-center py-12">
-        <div className="relative w-64 h-64 mx-auto mb-8 rounded-2xl overflow-hidden border-4 border-destructive/20 shadow-2xl bg-black/5 flex items-center justify-center">
-          <AlertCircle className="h-16 w-16 text-destructive animate-pulse" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2 text-destructive">{error || "Error"}</h2>
-        <Button variant="outline" onClick={onReset} className="mt-6">Try Another Image</Button>
-      </div>
-    );
-  }
 
   if (stage !== "complete") {
     return (
