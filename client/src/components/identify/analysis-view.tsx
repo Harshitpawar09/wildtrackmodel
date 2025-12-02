@@ -43,7 +43,6 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
   const [stage, setStage] = useState<"scanning" | "processing" | "complete">("scanning");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
-  const CONFIDENCE_THRESHOLD = 70; // percent
 
   // Convert file to URL for display
   const imageUrl = URL.createObjectURL(imageFile);
@@ -51,7 +50,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
   useEffect(() => {
     // Simulation of analysis process
     let timer: NodeJS.Timeout;
-
+    
     if (stage === "scanning") {
       timer = setInterval(() => {
         setProgress((prev) => {
@@ -64,35 +63,16 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
       }, 40);
     } else if (stage === "processing") {
       setTimeout(() => {
-        // Force 'other' if filename contains 'dog', 'other', or does not contain 'tiger' or 'elephant'
-        const lowerName = imageFile.name.toLowerCase();
-        let forceOther = false;
-        if (
-          lowerName.includes("dog") ||
-          lowerName.includes("other") ||
-          (!lowerName.includes("tiger") && !lowerName.includes("elephant"))
-        ) {
-          forceOther = true;
-        }
+        // For simulation, we'll randomly pick one of the supported classes
+        // In a real backend integration, this would be the response from the Python script
         const keys = Object.keys(SPECIES_DATA);
+        // Use a more varied random selection based on file properties
         const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
         const sizeHash = imageFile.size;
         const combinedHash = (hash ^ sizeHash) * 9301 + 49297;
         const index = Math.abs(combinedHash % keys.length);
+        const species = SPECIES_DATA[keys[index]];
         const confidence = generateConfidenceScore(imageFile);
-        let species;
-        if (forceOther || confidence < CONFIDENCE_THRESHOLD) {
-          species = {
-            id: "other",
-            name: "Another animal footprint",
-            scientific: "Unknown",
-            status: "Unknown",
-            description: "The uploaded footprint does not match tiger or elephant. It may belong to another animal.",
-            habitat: "Unknown",
-          };
-        } else {
-          species = SPECIES_DATA[keys[index]];
-        }
         setResult({ ...species, confidence });
         setStage("complete");
       }, 1500);
