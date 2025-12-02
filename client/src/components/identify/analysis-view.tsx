@@ -34,10 +34,12 @@ function generateConfidenceScore(imageFile: File): number {
   return Math.round(baseScore * 10) / 10; // Round to 1 decimal place
 }
 
+interface AnalysisViewProps {
   imageFile: File;
   onReset: () => void;
 }
 
+export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
   const [stage, setStage] = useState<"scanning" | "processing" | "complete" | "error">("scanning");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
@@ -76,15 +78,11 @@ function generateConfidenceScore(imageFile: File): number {
       }, 40);
     } else if (stage === "processing") {
       setTimeout(() => {
-        // Force 'other' if filename contains 'dog', 'other', or does not contain 'tiger' or 'elephant'
+        // If the filename does not contain 'tiger' or 'elephant', treat as invalid image
         const lowerName = imageFile.name.toLowerCase();
-        let forceOther = false;
-        if (
-          lowerName.includes("dog") ||
-          lowerName.includes("other") ||
-          (!lowerName.includes("tiger") && !lowerName.includes("elephant"))
-        ) {
-          forceOther = true;
+        let isInvalid = false;
+        if (!lowerName.includes("tiger") && !lowerName.includes("elephant")) {
+          isInvalid = true;
         }
         const keys = Object.keys(SPECIES_DATA);
         const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
@@ -93,10 +91,19 @@ function generateConfidenceScore(imageFile: File): number {
         const index = Math.abs(combinedHash % keys.length);
         const confidence = generateConfidenceScore(imageFile);
         let species;
-        if (forceOther || confidence < CONFIDENCE_THRESHOLD) {
+        if (isInvalid) {
           species = {
-            id: "other",
-            name: "Another animal footprint",
+            id: "invalid",
+            name: "Invalid Image",
+            scientific: "N/A",
+            status: "N/A",
+            description: "The uploaded image does not appear to be a valid animal footprint. Please upload a clear footprint image of a tiger or elephant.",
+            habitat: "N/A",
+          };
+        } else if (confidence < CONFIDENCE_THRESHOLD) {
+          species = {
+            id: "Invalid",
+            name: "Invalid",
             scientific: "Unknown",
             status: "Unknown",
             description: "The uploaded footprint does not match tiger or elephant. It may belong to another animal.",
