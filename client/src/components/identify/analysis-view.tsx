@@ -57,7 +57,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
       setStage("error");
       return;
     }
-    if (imageFile.size < 30 * 1024) { // less than 30kb
+    if (imageFile.size < 10 * 1024) { // less than 10kb
       setError("Image Not Clear. Please upload a higher quality image.");
       setStage("error");
       return;
@@ -97,7 +97,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
             name: "Invalid Image",
             scientific: "N/A",
             status: "N/A",
-            description: "The uploaded image does not appear to be a valid animal footprint. Please upload a clear footprint image of a tiger or elephant.",
+            description: "The uploaded image does not appear to be a valid animal footprint. Please upload a clear footprint image.",
             habitat: "N/A",
           };
         } else if (confidence < CONFIDENCE_THRESHOLD) {
