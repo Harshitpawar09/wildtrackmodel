@@ -43,6 +43,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
   const [stage, setStage] = useState<"scanning" | "processing" | "complete">("scanning");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
+  const CONFIDENCE_THRESHOLD = 70; // percent
 
   // Convert file to URL for display
   const imageUrl = URL.createObjectURL(imageFile);
@@ -71,8 +72,20 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
         const sizeHash = imageFile.size;
         const combinedHash = (hash ^ sizeHash) * 9301 + 49297;
         const index = Math.abs(combinedHash % keys.length);
-        const species = SPECIES_DATA[keys[index]];
         const confidence = generateConfidenceScore(imageFile);
+        let species;
+        if (confidence < CONFIDENCE_THRESHOLD) {
+          species = {
+            id: "other",
+            name: "Another animal footprint",
+            scientific: "Unknown",
+            status: "Unknown",
+            description: "The uploaded footprint does not match tiger or elephant. It may belong to another animal.",
+            habitat: "Unknown",
+          };
+        } else {
+          species = SPECIES_DATA[keys[index]];
+        }
         setResult({ ...species, confidence });
         setStage("complete");
       }, 1500);
