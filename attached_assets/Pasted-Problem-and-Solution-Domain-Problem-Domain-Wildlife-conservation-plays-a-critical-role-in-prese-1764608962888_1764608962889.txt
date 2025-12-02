@@ -1,0 +1,70 @@
+Problem and Solution Domain 
+Problem Domain: 
+Wildlife conservation plays a critical role in preserving biodiversity and maintaining ecological 
+balance. One of the key tasks in wildlife research and monitoring is identifying the species 
+present in a specific area. Traditionally, forest officials, trackers, and researchers rely on direct 
+sightings or pugmark (footprint) analysis to identify animals. However, manual pugmark 
+identification requires extensive experience and is prone to human error, especially in cases of 
+partial or unclear prints. In dense forests, during the night, or in regions with low visibility, direct 
+sightings are rare, making footprint analysis the only viable method. 
+The limitations of manual analysis include: 
+ Time-consuming identification process. 
+ Dependency on human expertise. 
+ Difficulty in maintaining large-scale monitoring operations. 
+ Inaccuracy in case of distorted or incomplete prints. 
+Solution Domain: 
+The proposed solution is to create an AI-powered Wildlife Species Identifier that can 
+automatically detect the animal species from an image of its footprint. This will be achieved 
+using Convolutional Neural Networks (CNN), a type of deep learning model specialized in 
+image recognition. The system will be trained on a dataset of wildlife footprints (both sourced 
+online and self-captured using clay simulations) and will be capable of classifying them into 
+species such as tiger, leopard, deer, elephant, etc. 
+The application will be accessible via a simple web interface, allowing forest officials, 
+researchers, and students to upload an image of a footprint and instantly receive the predicted 
+species. This approach will: 
+ Reduce dependency on expert trackers. 
+ Enable fast and contactless monitoring. 
+ Provide consistent and accurate results. 
+ Support large-scale wildlife monitoring in forests and protected areas. 
+By combining artificial intelligence with wildlife tracking, this project aims to modernize 
+traditional conservation methods, making them faster, smarter, and more reliable. 
+Page No. 1 
+Requirement Specification 
+Hardware Requirements: 
+ Processor: Minimum Intel Core i3 (or equivalent) 
+ RAM: 8 GB or higher (for smooth training and testing) 
+ Storage: 20 GB free space (for dataset and model files) 
+ Graphics Card (Optional): NVIDIA GPU for faster model training (e.g., GTX 1050 or 
+higher) 
+ Camera/Smartphone: For capturing clay-simulated footprint images 
+Software Requirements: 
+ Operating System: Windows 
+ Programming Language: Python 3.x 
+ Libraries & Frameworks: 
+o TensorFlow (Deep Learning) 
+o OpenCV (Image Processing) 
+o NumPy, Pandas (Data Handling) 
+o Matplotlib (Visualization) 
+o scikit-learn (Evaluation) 
+ Development Environment: Jupyter Notebook 
+ Web Framework (for Deployment): Django 
+ Dataset Storage: Local system or Google Drive 
+Page No. 2 
+Expected Outcome 
+The expected outcome of this project is a fully functional AI-based application that can 
+accurately identify animal species from their footprint images. The final system will: 
+1. Accept an uploaded footprint image through a web interface. 
+2. Process and analyze the image using a trained deep learning model. 
+3. Display the predicted species with confidence score. 
+4. Allow researchers and forest staff to use the tool without needing coding or AI expertise. 
+Key Deliverables: 
+ Trained CNN Model for footprint classification. 
+ Web Application for easy access and usage. 
+ Comprehensive Dataset of wildlife footprints. 
+ Documentation & User Guide for understanding the system. 
+Impact: 
+This system will help wildlife researchers, forest departments, and conservationists in 
+tracking animals more efficiently. It will also serve as an educational tool for students and 
+enthusiasts learning about wildlife monitoring. By reducing manual workload and increasing 
+accuracy, the project can contribute to better wildlife management and anti-poaching 
+measures.
