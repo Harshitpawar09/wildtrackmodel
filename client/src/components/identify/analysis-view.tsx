@@ -97,7 +97,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
             name: "Invalid Image",
             scientific: "N/A",
             status: "N/A",
-            description: "The uploaded image does not appear to be a valid animal footprint. Please upload a clear animal footprint image.",
+            description: "The uploaded image does not appear to be a valid animal footprint. Please upload another image.",
             habitat: "N/A",
           };
         } else if (confidence < CONFIDENCE_THRESHOLD) {
