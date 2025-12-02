@@ -50,8 +50,6 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
   const imageUrl = URL.createObjectURL(imageFile);
 
   useEffect(() => {
-    // 🗑️ The section for 'Invalid Image Format' and 'Image Not Clear' validation has been removed.
-
     // Simulation of analysis process
     let timer: NodeJS.Timeout;
 
@@ -70,13 +68,18 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
         // Force 'other' if filename contains 'dog', 'other', or does not contain 'tiger' or 'elephant'
         const lowerName = imageFile.name.toLowerCase();
         let forceOther = false;
-        if (
+        
+        // 🚨 NEW LOGIC: Check for image size (10KB = 10 * 1024 bytes)
+        if (imageFile.size < 10 * 1024) { 
+            forceOther = true;
+        } else if (
           lowerName.includes("dog") ||
           lowerName.includes("other") ||
           (!lowerName.includes("tiger") && !lowerName.includes("elephant"))
         ) {
           forceOther = true;
         }
+
         const keys = Object.keys(SPECIES_DATA);
         const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
         const sizeHash = imageFile.size;
@@ -85,14 +88,14 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
         const confidence = generateConfidenceScore(imageFile);
         let species;
         
-        // **LOGIC MODIFICATION HERE:** Implementing Confidence Thresholding
+        // Check for forceOther OR low confidence
         if (forceOther || confidence < CONFIDENCE_THRESHOLD) {
           species = {
             id: "other",
             name: "Another animal footprint",
             scientific: "Unknown",
             status: "Unknown",
-            description: "The uploaded footprint does not match tiger or elephant. It may belong to another animal.",
+            description: "The uploaded footprint does not match tiger or elephant, possibly due to low quality or being from another animal.",
             habitat: "Unknown",
           };
         } else {
