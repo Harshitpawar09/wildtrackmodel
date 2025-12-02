@@ -57,7 +57,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
       setStage("error");
       return;
     }
-    if (imageFile.size < 10 * 1024) { // less than 10KB
+    if (imageFile.size < 30 * 1024) { // less than 30kb
       setError("Image Not Clear. Please upload a higher quality image.");
       setStage("error");
       return;
