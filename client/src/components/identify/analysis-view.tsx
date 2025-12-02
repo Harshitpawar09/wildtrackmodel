@@ -34,17 +34,15 @@ function generateConfidenceScore(imageFile: File): number {
   return Math.round(baseScore * 10) / 10; // Round to 1 decimal place
 }
 
-interface ResultDisplayProps {
+interface AnalysisViewProps {
   imageFile: File;
   onReset: () => void;
 }
 
-export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
-  const [stage, setStage] = useState<"scanning" | "processing" | "complete" | "error">("scanning");
+export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
+  const [stage, setStage] = useState<"scanning" | "processing" | "complete">("scanning");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const CONFIDENCE_THRESHOLD = 70; // percent
 
   // Convert file to URL for display
   const imageUrl = URL.createObjectURL(imageFile);
@@ -52,7 +50,7 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
   useEffect(() => {
     // Simulation of analysis process
     let timer: NodeJS.Timeout;
-
+    
     if (stage === "scanning") {
       timer = setInterval(() => {
         setProgress((prev) => {
@@ -65,43 +63,16 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
       }, 40);
     } else if (stage === "processing") {
       setTimeout(() => {
-        // Force 'other' if filename contains 'dog', 'other', or does not contain 'tiger' or 'elephant'
-        const lowerName = imageFile.name.toLowerCase();
-        let forceOther = false;
-        
-        // 🚨 NEW LOGIC: Check for image size (10KB = 10 * 1024 bytes)
-        if (imageFile.size < 10 * 1024) { 
-            forceOther = true;
-        } else if (
-          lowerName.includes("dog") ||
-          lowerName.includes("other") ||
-          (!lowerName.includes("tiger") && !lowerName.includes("elephant"))
-        ) {
-          forceOther = true;
-        }
-
+        // For simulation, we'll randomly pick one of the supported classes
+        // In a real backend integration, this would be the response from the Python script
         const keys = Object.keys(SPECIES_DATA);
+        // Use a more varied random selection based on file properties
         const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
         const sizeHash = imageFile.size;
         const combinedHash = (hash ^ sizeHash) * 9301 + 49297;
         const index = Math.abs(combinedHash % keys.length);
+        const species = SPECIES_DATA[keys[index]];
         const confidence = generateConfidenceScore(imageFile);
-        let species;
-        
-        // Check for forceOther OR low confidence
-        if (forceOther || confidence < CONFIDENCE_THRESHOLD) {
-          species = {
-            id: "other",
-            name: "Another animal footprint",
-            scientific: "Unknown",
-            status: "Unknown",
-            description: "The uploaded footprint does not match tiger or elephant, possibly due to low quality or being from another animal.",
-            habitat: "Unknown",
-          };
-        } else {
-          species = SPECIES_DATA[keys[index]];
-        }
-        
         setResult({ ...species, confidence });
         setStage("complete");
       }, 1500);
@@ -109,20 +80,6 @@ export function ResultDisplay({ imageFile, onReset }: ResultDisplayProps) {
 
     return () => clearInterval(timer);
   }, [stage, imageFile]);
-
-  // --- Rendering Logic ---
-
-  if (stage === "error") {
-    return (
-      <div className="w-full max-w-xl mx-auto text-center py-12">
-        <div className="relative w-64 h-64 mx-auto mb-8 rounded-2xl overflow-hidden border-4 border-destructive/20 shadow-2xl bg-black/5 flex items-center justify-center">
-          <AlertCircle className="h-16 w-16 text-destructive animate-pulse" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2 text-destructive">{error || "Error"}</h2>
-        <Button variant="outline" onClick={onReset} className="mt-6">Try Another Image</Button>
-      </div>
-    );
-  }
 
   if (stage !== "complete") {
     return (
