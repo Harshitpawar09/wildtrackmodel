@@ -12,15 +12,18 @@ const SPECIES_DATA: Record<string, any> = {
     name: "Elephant",
     scientific: "Elephas maximus",
     status: "Endangered",
-    description: "Asian elephants are the largest living land animals in Asia. They are highly intelligent and social animals, identifiable by their large, rounded footprints with distinct toe impressions.",
-    habitat: "Grasslands, tropical evergreen forests, semi-evergreen forests.",
+    description:
+      "Asian elephants are the largest living land animals in Asia. They are highly intelligent and social animals, identifiable by their large, rounded footprints with distinct toe impressions.",
+    habitat:
+      "Grasslands, tropical evergreen forests, semi-evergreen forests.",
   },
   "1": {
     id: "1",
     name: "Tiger",
     scientific: "Panthera tigris",
     status: "Endangered",
-    description: "The Tiger is the largest extant cat species. Its pugmarks are distinctively asymmetrical with four toe pads and a large main pad, often showing no claw marks.",
+    description:
+      "The Tiger is the largest extant cat species. Its pugmarks are distinctively asymmetrical with four toe pads and a large main pad, often showing no claw marks.",
     habitat: "Tropical rainforests, marshlands, and tall grasslands.",
   },
 };
@@ -28,9 +31,11 @@ const SPECIES_DATA: Record<string, any> = {
 // Generate dynamic confidence score based on image data
 function generateConfidenceScore(imageFile: File): number {
   // Create a hash from file data to make it deterministic but varied
-  const hash = imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0) + (imageFile.size % 1000);
+  const hash =
+    imageFile.name.split("").reduce((a, b) => a + b.charCodeAt(0), 0) +
+    (imageFile.size % 1000);
   // Generate confidence between 82% and 99.5%
-  const baseScore = 82 + (hash % 1750) / 100;
+  const baseScore = 82 + ((hash % 1750) / 100);
   return Math.round(baseScore * 10) / 10; // Round to 1 decimal place
 }
 
@@ -40,17 +45,31 @@ interface AnalysisViewProps {
 }
 
 export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
-  const [stage, setStage] = useState<"scanning" | "processing" | "complete">("scanning");
+  const [stage, setStage] = useState<"scanning" | "processing" | "complete">(
+    "scanning"
+  );
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
+
+  // ✅ NEW: invalid image state
+  const [invalidImage, setInvalidImage] = useState(false);
 
   // Convert file to URL for display
   const imageUrl = URL.createObjectURL(imageFile);
 
   useEffect(() => {
+    // ✅ NEW: validate image size (< 10 KB is invalid)
+    if (imageFile.size < 10 * 1024) {
+      setInvalidImage(true);
+      return;
+    } else {
+      // reset if user uploads a valid image after an invalid one
+      setInvalidImage(false);
+    }
+
     // Simulation of analysis process
     let timer: NodeJS.Timeout;
-    
+
     if (stage === "scanning") {
       timer = setInterval(() => {
         setProgress((prev) => {
@@ -81,11 +100,32 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
     return () => clearInterval(timer);
   }, [stage, imageFile]);
 
+  // ✅ NEW: Early return UI for invalid images
+  if (invalidImage) {
+    return (
+      <div className="w-full max-w-xl mx-auto text-center py-12">
+        <div className="text-red-600 font-bold text-2xl mb-4">
+          Invalid Image
+        </div>
+        <p className="text-muted-foreground mb-6">
+          Image size is too small (below 10 KB). Kindly upload another image.
+        </p>
+        <Button onClick={onReset} variant="destructive">
+          Upload Another Image
+        </Button>
+      </div>
+    );
+  }
+
   if (stage !== "complete") {
     return (
       <div className="w-full max-w-xl mx-auto text-center py-12">
         <div className="relative w-64 h-64 mx-auto mb-8 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-2xl bg-black/5">
-          <img src={imageUrl} className="w-full h-full object-cover opacity-50" alt="Scanning" />
+          <img
+            src={imageUrl}
+            className="w-full h-full object-cover opacity-50"
+            alt="Scanning"
+          />
           <motion.div
             className="absolute inset-0 bg-primary/20 border-b-2 border-primary box-content"
             initial={{ top: "-100%" }}
@@ -124,7 +164,11 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
         <div className="space-y-6">
           <Card className="overflow-hidden border-none shadow-xl rounded-3xl bg-black/5">
             <div className="relative aspect-square md:aspect-[4/3]">
-              <img src={imageUrl} className="w-full h-full object-contain" alt="Analyzed Footprint" />
+              <img
+                src={imageUrl}
+                className="w-full h-full object-contain"
+                alt="Analyzed Footprint"
+              />
               <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full flex items-center gap-2">
                 <CheckCircle2 className="h-3 w-3 text-green-400" />
                 Inference Complete
@@ -174,9 +218,7 @@ export function AnalysisView({ imageFile, onReset }: AnalysisViewProps) {
             </div>
             <div>
               <h3 className="font-bold text-foreground mb-1">Habitat</h3>
-              <p className="text-muted-foreground">
-                {result.habitat}
-              </p>
+              <p className="text-muted-foreground">{result.habitat}</p>
             </div>
           </div>
         </div>
